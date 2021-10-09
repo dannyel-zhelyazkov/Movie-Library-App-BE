@@ -1,5 +1,13 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
+import {
+	DetailedMovieResponse,
+	Genre,
+	MovieItem,
+	MovieItemResponse,
+	MovieItemResult,
+	MovieItems,
+} from './types';
 
 dotenv.config();
 
@@ -10,14 +18,14 @@ export class TmdbApi {
 	public static searchMovies = async (
 		page: number,
 		titleQuery: string,
-	): Promise<MovieItem[]> => {
-		const { data } = await axios.get(
+	): Promise<MovieItems> => {
+		const res = await axios.get(
 			`${this.baseUrl}/search/movie?api_key=${this.apiKey}&page=${page}&query=${titleQuery}`,
 		);
 
-		const movies = data as MovieItemResponse;
+		const movies = res.data as MovieItemResponse;
 
-		return movies.results.map((item: MovieItemResult) => ({
+		const items = movies.results.map((item: MovieItemResult) => ({
 			id: item.id,
 			title: item.title,
 			poster: `https://www.themoviedb.org/t/p/w220_and_h330_face/${item.poster_path}`,
@@ -25,6 +33,11 @@ export class TmdbApi {
 			releaseDate: item.release_date.split('')[0],
 			description: item.overview,
 		}));
+
+		return {
+			items,
+			pages: movies.total_pages,
+		};
 	};
 
 	public static getMovie = async (id: number): Promise<MovieItem> => {
@@ -40,7 +53,7 @@ export class TmdbApi {
 			poster: `https://www.themoviedb.org/t/p/w220_and_h330_face/${movie.poster_path}`,
 			title: movie.title,
 			releaseDate: movie.release_date.split('-')[0],
-			genreIds: movie.genres.map((g) => g.id),
+			genreIds: movie.genres.map((g: Genre) => g.id),
 		};
 	};
 }

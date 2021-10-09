@@ -2,7 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import { connectDb } from './database';
-import { favoriteRouter } from './routes';
+import { favoriteRoute, searchRoute } from './routes';
 
 dotenv.config();
 
@@ -18,7 +18,8 @@ app.use(
 app.use(express.urlencoded());
 app.use(express.json());
 
-app.use('/favorites', favoriteRouter);
+app.use('/favorites', favoriteRoute);
+app.use('/search', searchRoute);
 
 connectDb().then(() =>
 	app.listen(port, () => {

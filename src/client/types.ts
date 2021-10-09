@@ -1,4 +1,4 @@
-interface MovieItemResult {
+export interface MovieItemResult {
 	poster_path: string;
 	overview: string;
 	release_date: string;
@@ -7,16 +7,17 @@ interface MovieItemResult {
 	title: string;
 }
 
-interface Genre {
+export interface Genre {
 	id: number;
 	name: string;
 }
 
-interface MovieItemResponse {
+export interface MovieItemResponse {
 	results: Array<MovieItemResult>;
+	total_pages: number;
 }
 
-interface DetailedMovieResponse {
+export interface DetailedMovieResponse {
 	poster_path: string;
 	genres: Array<Genre>;
 	id: number;
@@ -25,11 +26,16 @@ interface DetailedMovieResponse {
 	release_date: string;
 }
 
-interface MovieItem {
+export interface MovieItem {
 	id: number;
 	title: string;
 	poster: string;
 	genreIds: Array<number>;
 	releaseDate: string;
 	description: string;
+}
+
+export interface MovieItems {
+	items: Array<MovieItem>;
+	pages: number;
 }
