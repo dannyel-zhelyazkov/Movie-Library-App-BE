@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import { connectDb } from './database';
 
 dotenv.config();
 
@@ -14,6 +15,8 @@ app.use(
 	}),
 );
 
-app.listen(port, () => {
-	console.log(`Server is running on http://localhost:${port}`);
-});
+connectDb().then(() =>
+	app.listen(port, () => {
+		console.log(`Server is running on http://localhost:${port}`);
+	}),
+);
