@@ -1,10 +1,10 @@
 import express from 'express';
 import { FavoritesService } from '../services';
 
-const favoriteRouter = express.Router();
+const favoriteRoute = express.Router();
 
-favoriteRouter.get('/', FavoritesService.getFavorites);
-favoriteRouter.post('/', FavoritesService.addFavorites);
-favoriteRouter.delete('/:id', FavoritesService.removeFavorites);
+favoriteRoute.get('/', FavoritesService.getFavorites);
+favoriteRoute.post('/', FavoritesService.addFavorites);
+favoriteRoute.delete('/:id', FavoritesService.removeFavorites);
 
-export { favoriteRouter };
+export { favoriteRoute };
