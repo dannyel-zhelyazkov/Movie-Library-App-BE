@@ -12,6 +12,10 @@ export interface Genre {
 	name: string;
 }
 
+export interface GenresResponse {
+	genres: Array<Genre>;
+}
+
 export interface MovieItemResponse {
 	results: Array<MovieItemResult>;
 	total_pages: number;
@@ -30,9 +34,10 @@ export interface MovieItem {
 	id: number;
 	title: string;
 	poster: string;
-	genreIds: Array<number>;
+	genres: Array<string>;
 	releaseDate: string;
 	description: string;
+	officialPage: string;
 }
 
 export interface MovieItems {

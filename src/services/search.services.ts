@@ -3,10 +3,10 @@ import { TmdbApi } from '../client';
 
 export class SearchService {
 	public static findMovieByTitle = async (req: Request, res: Response) => {
-		const { page, title } = req.body;
+		const { page, title } = req.query;
 
 		try {
-			const data = await TmdbApi.searchMovies(page, title);
+			const data = await TmdbApi.searchMovies(Number(page), title.toString());
 
 			res.send(data);
 		} catch (err) {
