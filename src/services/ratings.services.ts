@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import { changeRatingDto, ratingDto } from '../dtos';
 import { RatingModel } from '../models';
 
 export class RatingsService {
@@ -16,11 +17,7 @@ export class RatingsService {
 			return next();
 		}
 
-		res.send({
-			id: rating[0]._id,
-			movieId: rating[0].movieId,
-			rating: rating[0].rating,
-		});
+		res.send(ratingDto(rating[0]));
 	};
 
 	public static addRating = async (
@@ -30,17 +27,13 @@ export class RatingsService {
 	) => {
 		const { rating, movieId } = req.body;
 
-		RatingModel.create({ movieId: movieId, rating: rating }, (err, small) => {
+		RatingModel.create({ movieId: movieId, rating: rating }, (err, result) => {
 			if (err) {
-				res.send({ message: err.message });
+				res.send({ error: err.message });
 				return next();
 			}
 
-			res.send({
-				id: small._id,
-				movieId: small.movieId,
-				rating: small.rating,
-			});
+			res.send(ratingDto(result));
 		});
 	};
 
@@ -53,10 +46,7 @@ export class RatingsService {
 				{ rating: rating },
 			);
 
-			res.send({
-				movieId,
-				rating,
-			});
+			res.send(changeRatingDto(movieId, rating));
 		} catch (err) {
 			res.send({ error: 'The movie was not found!' });
 		}
@@ -74,7 +64,7 @@ export class RatingsService {
 				message: `Successfully removed rating from movie ${id}`,
 			});
 		} catch (err) {
-			res.send({ message: err.message });
+			res.send({ error: err.message });
 		}
 	};
 }

@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose';
+import { Document, model, ObjectId, Schema } from 'mongoose';
 
 interface Rating {
 	movieId: number;
@@ -19,3 +19,6 @@ const schema = new Schema<Rating>({
 });
 
 export const RatingModel = model<Rating>('Rating', schema);
+
+export type RatingSchema = Document<any, any, Rating> &
+	Rating & { _id: ObjectId };
