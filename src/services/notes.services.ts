@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
+import { notesValidation } from '../validations';
 import { changeNotesDto, notesDto } from '../dtos';
-import { NotesModel } from '../models';
+import { NotesModel, NotesSchema } from '../models';
 
 export class NotesService {
 	public static getNotes = async (
@@ -27,21 +28,38 @@ export class NotesService {
 	) => {
 		const { notes, movieId } = req.body;
 
-		NotesModel.create({ movieId: movieId, notes: notes }, (err, result) => {
-			if (err) {
-				res.send({ error: err.message });
-				return next();
-			}
+		try {
+			const notesResult = await notesValidation.validateAsync({
+				notes,
+				movieId,
+			});
 
-			res.send(notesDto(result));
-		});
+			NotesModel.create(notesResult, (err: any, result: NotesSchema) => {
+				if (err) {
+					res.send({ error: err.message });
+					return next();
+				}
+
+				res.send(notesDto(result));
+			});
+		} catch (err) {
+			res.status(400).send({ error: err.message });
+		}
 	};
 
 	public static changeNotes = async (req: Request, res: Response) => {
 		const { notes, movieId } = req.body;
 
 		try {
-			await NotesModel.updateOne({ movieId: movieId }, { notes: notes });
+			const notesResult = await notesValidation.validateAsync({
+				notes,
+				movieId,
+			});
+
+			await NotesModel.updateOne(
+				{ movieId: notesResult.movieId },
+				{ notes: notesResult.notes },
+			);
 
 			res.send(changeNotesDto(movieId, notes));
 		} catch (err) {

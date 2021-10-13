@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
+import { ratingsValidation } from '../validations';
 import { changeRatingDto, ratingDto } from '../dtos';
-import { RatingModel } from '../models';
+import { RatingModel, RatingSchema } from '../models';
 
 export class RatingsService {
 	public static getRating = async (
@@ -27,23 +28,37 @@ export class RatingsService {
 	) => {
 		const { rating, movieId } = req.body;
 
-		RatingModel.create({ movieId: movieId, rating: rating }, (err, result) => {
-			if (err) {
-				res.send({ error: err.message });
-				return next();
-			}
+		try {
+			const ratingResult = await ratingsValidation.validateAsync({
+				rating,
+				movieId,
+			});
 
-			res.send(ratingDto(result));
-		});
+			RatingModel.create(ratingResult, (err: any, result: RatingSchema) => {
+				if (err) {
+					res.send({ error: err.message });
+					return next();
+				}
+
+				res.send(ratingDto(result));
+			});
+		} catch (err) {
+			res.status(400).send({ error: err.message });
+		}
 	};
 
 	public static changeRating = async (req: Request, res: Response) => {
 		const { rating, movieId } = req.body;
 
 		try {
-			const a = await RatingModel.updateOne(
-				{ movieId: movieId },
-				{ rating: rating },
+			const ratingResult = await ratingsValidation.validateAsync({
+				rating,
+				movieId,
+			});
+
+			await RatingModel.updateOne(
+				{ movieId: ratingResult.movieId },
+				{ rating: ratingResult.rating },
 			);
 
 			res.send(changeRatingDto(movieId, rating));
