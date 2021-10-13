@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose';
+import { model, ObjectId, Schema, Document } from 'mongoose';
 
 interface Notes {
 	movieId: number;
@@ -19,3 +19,5 @@ const schema = new Schema<Notes>({
 });
 
 export const NotesModel = model<Notes>('Notes', schema);
+
+export type NotesSchema = Document<any, any, Notes> & Notes & { _id: ObjectId };

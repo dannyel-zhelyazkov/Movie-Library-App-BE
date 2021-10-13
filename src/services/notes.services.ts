@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { changeNotesDto, notesDto } from '../dtos';
 import { NotesModel } from '../models';
 
 export class NotesService {
@@ -12,14 +13,11 @@ export class NotesService {
 		const notes = await NotesModel.find().where({ movieId: movieId });
 
 		if (notes.length === 0) {
-			res.send({ message: 'The move was not found!' });
+			res.send({ error: 'The move was not found!' });
 			return next();
 		}
 
-		res.send({
-			id: notes[0]._id,
-			notes: notes[0].notes,
-		});
+		res.send(notesDto(notes[0]));
 	};
 
 	public static addNotes = async (
@@ -29,16 +27,13 @@ export class NotesService {
 	) => {
 		const { notes, movieId } = req.body;
 
-		NotesModel.create({ movieId: movieId, notes: notes }, (err, small) => {
+		NotesModel.create({ movieId: movieId, notes: notes }, (err, result) => {
 			if (err) {
-				res.send({ message: err.message });
+				res.send({ error: err.message });
 				return next();
 			}
 
-			res.send({
-				id: small._id,
-				notes: small.notes,
-			});
+			res.send(notesDto(result));
 		});
 	};
 
@@ -48,12 +43,9 @@ export class NotesService {
 		try {
 			await NotesModel.updateOne({ movieId: movieId }, { notes: notes });
 
-			res.send({
-				movieId,
-				notes,
-			});
+			res.send(changeNotesDto(movieId, notes));
 		} catch (err) {
-			res.send({ message: 'The movie was not found!' });
+			res.send({ error: 'The movie was not found!' });
 		}
 	};
 
@@ -69,7 +61,7 @@ export class NotesService {
 				message: `Successfully removed notes from movie ${id}`,
 			});
 		} catch (err) {
-			res.send({ message: err.message });
+			res.send({ error: err.message });
 		}
 	};
 }
