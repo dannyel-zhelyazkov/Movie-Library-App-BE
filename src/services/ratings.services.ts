@@ -12,11 +12,15 @@ export class RatingsService {
 		const rating = await RatingModel.find().where({ movieId: movieId });
 
 		if (rating.length === 0) {
-			res.send({ message: 'The move was not found!' });
+			res.send({ rating: 0 });
 			return next();
 		}
 
-		res.send(rating);
+		res.send({
+			id: rating[0]._id,
+			movieId: rating[0].movieId,
+			rating: rating[0].rating,
+		});
 	};
 
 	public static addRating = async (
@@ -32,7 +36,11 @@ export class RatingsService {
 				return next();
 			}
 
-			res.send(small);
+			res.send({
+				id: small._id,
+				movieId: small.movieId,
+				rating: small.rating,
+			});
 		});
 	};
 
@@ -40,14 +48,17 @@ export class RatingsService {
 		const { rating, movieId } = req.body;
 
 		try {
-			await RatingModel.updateOne({ movieId: movieId }, { rating: rating });
+			const a = await RatingModel.updateOne(
+				{ movieId: movieId },
+				{ rating: rating },
+			);
 
 			res.send({
 				movieId,
 				rating,
 			});
 		} catch (err) {
-			res.send({ message: 'The movie was not found!' });
+			res.send({ error: 'The movie was not found!' });
 		}
 	};
 

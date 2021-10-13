@@ -16,7 +16,10 @@ export class NotesService {
 			return next();
 		}
 
-		res.send(notes);
+		res.send({
+			id: notes[0]._id,
+			notes: notes[0].notes,
+		});
 	};
 
 	public static addNotes = async (
@@ -32,7 +35,10 @@ export class NotesService {
 				return next();
 			}
 
-			res.send(small);
+			res.send({
+				id: small._id,
+				notes: small.notes,
+			});
 		});
 	};
 
