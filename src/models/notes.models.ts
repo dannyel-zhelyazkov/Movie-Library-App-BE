@@ -11,7 +11,7 @@ const schema = new Schema<Notes>({
 		type: String,
 		required: false,
 		validate: (value: string) => {
-			if (value.length <= 160) return true;
+			if (value.length <= 600) return true;
 
 			return false;
 		},
