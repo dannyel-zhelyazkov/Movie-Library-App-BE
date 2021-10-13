@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import { favoriteDto, favoritesDto, favoritesIdsDto } from '../dtos';
 import {
 	FAVORITE_MOVIES_PER_PAGE,
 	MATCH_ALL_WHEN_NO_TITLE_PROVIDED,
@@ -34,23 +35,15 @@ export class FavoritesService {
 				$options: 'i',
 			},
 		}).count({}, (err, count) => {
-			if (err) return;
+			if (err) res.send({ error: err.message });
 
 			const plusOnePage = count % FAVORITE_MOVIES_PER_PAGE > 0;
 			const pages =
 				Math.floor(count / FAVORITE_MOVIES_PER_PAGE) + (plusOnePage ? 1 : 0);
 
 			res.send({
-				favorites: favorites.map((f) => ({
-					id: f._id,
-					movieId: f.movieId,
-					title: f.title,
-					poster: f.poster,
-				})),
-				favoritesIds: favoritesIds.map((fid) => ({
-					id: fid._id,
-					movieId: fid.movieId,
-				})),
+				favorites: favoritesDto(favorites),
+				favoritesIds: favoritesIdsDto(favoritesIds),
 				totalPages: pages,
 			});
 		});
@@ -68,18 +61,13 @@ export class FavoritesService {
 				title: title,
 				poster: poster,
 			},
-			(err, small) => {
+			(err, result) => {
 				if (err) {
-					res.send({ ...err });
-					next();
+					res.send({ error: err.message });
+					return next();
 				}
 
-				res.send({
-					id: small._id,
-					movieId: small.movieId,
-					title: small.title,
-					poster: small.poster,
-				});
+				res.send(favoriteDto(result));
 			},
 		);
 	};
@@ -95,7 +83,7 @@ export class FavoritesService {
 				message: `Successfully removed favorite movie ${id} from Favorites`,
 			});
 		} catch (err) {
-			res.send({ message: err.message });
+			res.send({ error: err.message });
 		}
 	};
 }
