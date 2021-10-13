@@ -1,5 +1,6 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
+import { searchMoviesDto, searchMovieDto } from '../dtos';
 import { parseYear, combineOfficialPage, getGenresName } from '../utils';
 import {
 	DetailedMovieResponse,
@@ -18,7 +19,7 @@ export class TmdbApi {
 	private static apiKey: string = process.env.API_KEY;
 
 	public static searchMovies = async (
-		page: number,
+		page: string,
 		titleQuery: string,
 	): Promise<MovieItems> => {
 		const res = await axios.get(
@@ -32,18 +33,8 @@ export class TmdbApi {
 		const movies = res.data as MovieItemResponse;
 		const genres = resGenres.data as GenresResponse;
 
-		const items = movies.results.map((item: MovieItemResult) => ({
-			id: item.id,
-			title: item.title,
-			poster: item.poster_path,
-			genres: getGenresName(item.genre_ids, genres.genres),
-			releaseDate: parseYear(item.release_date),
-			description: item.overview,
-			officialPage: combineOfficialPage(item.id, item.title),
-		}));
-
 		return {
-			items,
+			items: searchMoviesDto(movies, genres),
 			pages: movies.total_pages,
 		};
 	};
@@ -55,14 +46,6 @@ export class TmdbApi {
 
 		const movie = data as DetailedMovieResponse;
 
-		return {
-			id: movie.id,
-			description: movie.overview,
-			poster: movie.poster_path,
-			title: movie.title,
-			releaseDate: parseYear(movie.release_date),
-			genres: movie.genres.map((g: Genre) => g.name),
-			officialPage: combineOfficialPage(movie.id, movie.title),
-		};
+		return searchMovieDto(movie);
 	};
 }

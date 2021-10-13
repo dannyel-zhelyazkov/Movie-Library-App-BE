@@ -6,7 +6,10 @@ export class SearchService {
 		const { page, title } = req.query;
 
 		try {
-			const data = await TmdbApi.searchMovies(Number(page), title.toString());
+			const data = await TmdbApi.searchMovies(
+				page.toString(),
+				title.toString(),
+			);
 
 			res.send(data);
 		} catch (err) {
