@@ -56,7 +56,10 @@ export class NotesService {
 				movieId,
 			});
 
-			await NotesModel.updateOne(notesResult.movieId, notesResult.notes);
+			await NotesModel.updateOne(
+				{ movieId: notesResult.movieId },
+				{ notes: notesResult.notes },
+			);
 
 			res.send(changeNotesDto(movieId, notes));
 		} catch (err) {
