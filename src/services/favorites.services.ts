@@ -10,6 +10,7 @@ import {
 	FavoriteSchema,
 	FavoriteSchemaArray,
 } from '../models';
+import { createFavorites } from '../validations';
 
 export class FavoritesService {
 	public static getFavorites = async (req: Request, res: Response) => {
@@ -55,21 +56,24 @@ export class FavoritesService {
 	) => {
 		const { id, title, poster } = req.body;
 
-		FavoriteModel.create(
-			{
+		try {
+			const favorite = await createFavorites.validateAsync({
 				movieId: id,
 				title: title,
 				poster: poster,
-			},
-			(err, result) => {
+			});
+
+			FavoriteModel.create(favorite, (err: any, result: FavoriteSchema) => {
 				if (err) {
 					res.send({ error: err.message });
 					return next();
 				}
 
 				res.send(favoriteDto(result));
-			},
-		);
+			});
+		} catch (err) {
+			res.status(400).send({ error: err.message });
+		}
 	};
 	public static removeFavorites = async (req: Request, res: Response) => {
 		const { id } = req.params;
