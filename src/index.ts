@@ -4,6 +4,7 @@ import cors from 'cors';
 import { connectDb } from './database';
 import { favoriteRoute, notesRoute, ratingsRoute, searchRoute } from './routes';
 import swaggerUI from 'swagger-ui-express';
+
 const docs = require('./docs');
 
 dotenv.config();
@@ -35,3 +36,5 @@ connectDb().then(() =>
 		console.log(`Server is running on http://localhost:${port}`);
 	}),
 );
+
+module.exports = app;

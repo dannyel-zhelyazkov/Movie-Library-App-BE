@@ -13,7 +13,9 @@ export class SearchService {
 
 			res.send(data);
 		} catch (err) {
-			res.send({ message: 'No movies were found with similar name!' });
+			res
+				.status(404)
+				.send({ message: 'No movies were found with similar name!' });
 		}
 	};
 
@@ -25,7 +27,7 @@ export class SearchService {
 
 			res.send(data);
 		} catch (err) {
-			res.send({ message: 'The movie was not found!' });
+			res.status(404).send({ message: 'The movie was not found!' });
 		}
 	};
 }

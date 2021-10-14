@@ -13,12 +13,12 @@ export class NotesService {
 
 		const notes = await NotesModel.find().where({ movieId: movieId });
 
-		if (notes.length === 0) {
-			res.send({ error: 'The move was not found!' });
+		if (notes.length !== 0) {
+			res.send(notesDto(notes[0]));
 			return next();
 		}
 
-		res.send(notesDto(notes[0]));
+		res.status(404).send({ error: 'The move was not found!' });
 	};
 
 	public static addNotes = async (
@@ -36,7 +36,7 @@ export class NotesService {
 
 			NotesModel.create(notesResult, (err: any, result: NotesSchema) => {
 				if (err) {
-					res.send({ error: err.message });
+					res.status(500).send({ error: err.message });
 					return next();
 				}
 
@@ -47,7 +47,11 @@ export class NotesService {
 		}
 	};
 
-	public static changeNotes = async (req: Request, res: Response) => {
+	public static changeNotes = async (
+		req: Request,
+		res: Response,
+		next: NextFunction,
+	) => {
 		const { notes, movieId } = req.body;
 
 		try {
@@ -56,30 +60,44 @@ export class NotesService {
 				movieId,
 			});
 
-			await NotesModel.updateOne(
+			const updated = await NotesModel.updateOne(
 				{ movieId: notesResult.movieId },
 				{ notes: notesResult.notes },
 			);
 
-			res.send(changeNotesDto(movieId, notes));
+			if (updated.matchedCount !== 0) {
+				res.send(changeNotesDto(movieId, notes));
+				return next();
+			}
+
+			res.status(404).send({ error: 'The movie was not found!' });
 		} catch (err) {
-			res.send({ error: 'The movie was not found!' });
+			res.status(400).send({ error: err.message });
 		}
 	};
 
-	public static removeNotes = async (req: Request, res: Response) => {
+	public static removeNotes = async (
+		req: Request,
+		res: Response,
+		next: NextFunction,
+	) => {
 		const { id } = req.params;
 
 		try {
-			await NotesModel.deleteOne({
-				_id: id,
-			});
+			const deleted = await NotesModel.findByIdAndDelete(id);
 
-			res.send({
-				message: `Successfully removed notes from movie ${id}`,
+			if (deleted) {
+				res.send({
+					message: `Successfully removed notes from movie ${id}`,
+				});
+				return next();
+			}
+
+			res.status(404).send({
+				error: 'The movie was not found!',
 			});
 		} catch (err) {
-			res.send({ error: err.message });
+			res.status(500).send({ error: err.message });
 		}
 	};
 }

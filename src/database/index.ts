@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
+import config from 'config';
 
 const connectDb = () => {
-	return mongoose.connect(process.env.DATABASE_URL);
+	return mongoose.connect(config.get('db.url'));
 };
 
 export { connectDb };
