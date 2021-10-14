@@ -18,8 +18,6 @@ app.use(
 		origin: 'http://localhost:3000',
 	}),
 );
-app.use(express.urlencoded());
-app.use(express.json());
 
 app.use(
 	'/api-docs',

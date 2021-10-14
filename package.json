@@ -2,7 +2,7 @@
 	"name": "movie-library-app-be",
 	"version": "1.0.0",
 	"description": "",
-	"main": "index.ts",
+	"main": "dist/index.js",
 	"scripts": {
 		"start": "nodemon src/index",
 		"test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --timeout 10000 -r ts-node/register 'tests/**/*.ts'"
