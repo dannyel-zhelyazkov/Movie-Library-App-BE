@@ -36,7 +36,7 @@ export class FavoritesService {
 				$options: 'i',
 			},
 		}).count({}, (err, count) => {
-			if (err) res.send({ error: err.message });
+			if (err) res.status(500).send({ error: err.message });
 
 			const plusOnePage = count % FAVORITE_MOVIES_PER_PAGE > 0;
 			const pages =
@@ -75,19 +75,29 @@ export class FavoritesService {
 			res.status(400).send({ error: err.message });
 		}
 	};
-	public static removeFavorites = async (req: Request, res: Response) => {
+	public static removeFavorites = async (
+		req: Request,
+		res: Response,
+		next: NextFunction,
+	) => {
 		const { id } = req.params;
 
 		try {
-			await FavoriteModel.deleteOne({
-				_id: id,
-			});
+			const deleted = await FavoriteModel.findByIdAndDelete(id);
 
-			res.send({
-				message: `Successfully removed favorite movie ${id} from Favorites`,
+			if (deleted) {
+				res.send({
+					message: `Successfully removed favorite movie ${id} from Favorites`,
+				});
+
+				return next();
+			}
+
+			res.status(404).send({
+				error: 'The movie was not found!',
 			});
 		} catch (err) {
-			res.send({ error: err.message });
+			res.status(400).send({ error: err.message });
 		}
 	};
 }

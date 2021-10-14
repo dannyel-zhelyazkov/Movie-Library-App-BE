@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { ratingsValidation } from '../validations';
 import { changeRatingDto, ratingDto } from '../dtos';
 import { RatingModel, RatingSchema } from '../models';
+import { nextTick } from 'process';
 
 export class RatingsService {
 	public static getRating = async (
@@ -13,12 +14,12 @@ export class RatingsService {
 
 		const rating = await RatingModel.find().where({ movieId: movieId });
 
-		if (rating.length === 0) {
-			res.send({ rating: 0 });
+		if (rating.length !== 0) {
+			res.send(ratingDto(rating[0]));
 			return next();
 		}
 
-		res.send(ratingDto(rating[0]));
+		res.send({ rating: 0 });
 	};
 
 	public static addRating = async (
@@ -36,7 +37,7 @@ export class RatingsService {
 
 			RatingModel.create(ratingResult, (err: any, result: RatingSchema) => {
 				if (err) {
-					res.send({ error: err.message });
+					res.status(500).send({ error: err.message });
 					return next();
 				}
 
@@ -47,7 +48,11 @@ export class RatingsService {
 		}
 	};
 
-	public static changeRating = async (req: Request, res: Response) => {
+	public static changeRating = async (
+		req: Request,
+		res: Response,
+		next: NextFunction,
+	) => {
 		const { rating, movieId } = req.body;
 
 		try {
@@ -56,30 +61,44 @@ export class RatingsService {
 				movieId,
 			});
 
-			await RatingModel.updateOne(
+			const updated = await RatingModel.updateOne(
 				{ movieId: ratingResult.movieId },
 				{ rating: ratingResult.rating },
 			);
 
-			res.send(changeRatingDto(movieId, rating));
+			if (updated.matchedCount !== 0) {
+				res.send(changeRatingDto(movieId, rating));
+				return next();
+			}
+
+			res.status(404).send({ error: 'The movie was not found!' });
 		} catch (err) {
-			res.send({ error: 'The movie was not found!' });
+			res.status(400).send({ error: err.message });
 		}
 	};
 
-	public static removeRating = async (req: Request, res: Response) => {
+	public static removeRating = async (
+		req: Request,
+		res: Response,
+		next: NextFunction,
+	) => {
 		const { id } = req.params;
 
 		try {
-			await RatingModel.deleteOne({
-				_id: id,
-			});
+			const deleted = await RatingModel.findByIdAndDelete(id);
 
-			res.send({
-				message: `Successfully removed rating from movie ${id}`,
+			if (deleted) {
+				res.send({
+					message: `Successfully removed rating from movie ${id}`,
+				});
+				return next();
+			}
+
+			res.status(404).send({
+				error: 'The movie was not found!',
 			});
 		} catch (err) {
-			res.send({ error: err.message });
+			res.status(500).send({ error: err.message });
 		}
 	};
 }
